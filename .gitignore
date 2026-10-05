@@ -5,3 +5,8 @@ evals/
 .claude-plugin/
 .idea/
 
+/.claude/
+/.claude-plugin/
+/.vibe/
+/.agents/
+/skills-lock.json
