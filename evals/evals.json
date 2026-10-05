@@ -1,0 +1,23 @@
+{
+  "skill_name": "reverse-app-prompt",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Je veux créer une alternative à KanbanFlow. Fais-moi le prompt complet pour Claude Code. Application : KanbanFlow. Sites officiels : je ne sais pas trop, kanbanflow.com je pense, trouve le reste.",
+      "expected_output": "Fichier kanbanflow-prompt.md suivant le gabarit, couvrant tableaux/colonnes/swimlanes, tâches, Pomodoro, time tracking, rapports, collaboration, API, avec demandes et bugs utilisateurs et sources.",
+      "files": [],
+      "assertions": [
+        "Le fichier kanbanflow-prompt.md existe dans outputs/",
+        "Le prompt contient les 13 sections du gabarit (0 à 13) et une annexe Sources",
+        "Le prompt utilise un nom de code différent de KanbanFlow et interdit de reprendre marque/logo/textes",
+        "Le prompt couvre les fonctionnalités cœur : tableaux, colonnes, swimlanes, tâches/sous-tâches, Pomodoro, time tracking, rapports",
+        "Chaque fonctionnalité du tableau de périmètre porte une étiquette d'origine ([Officiel]/[Déduit]/[Demande]/[Correctif])",
+        "Au moins 5 éléments [Demande] ou [Correctif] issus de sources utilisateurs (forum, Reddit, avis)",
+        "Les modules ont des critères d'acceptation vérifiables",
+        "La section modèle de données liste entités et relations",
+        "Au moins 20 URLs distinctes en annexe, dont des sources hors kanbanflow.com",
+        "Un fichier de notes de recherche existe dans outputs/kanbanflow-research/"
+      ]
+    }
+  ]
+}

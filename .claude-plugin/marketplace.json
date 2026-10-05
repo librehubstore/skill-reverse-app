@@ -1,0 +1,15 @@
+{
+  "name": "reverse-app-prompt",
+  "owner": { "name": "librehubstore" },
+  "plugins": [
+    {
+      "name": "reverse-app-prompt",
+      "source": "./",
+      "description": "Reverse-engineers an application's features from the public web and writes a ready-to-use functional prompt for Claude Code.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "strict": false,
+      "skills": ["./skills/reverse-app-prompt"]
+    }
+  ]
+}
