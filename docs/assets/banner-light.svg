@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
+  <rect width="1280" height="320" rx="24" fill="#ffffff"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" fill="#59636e">
+    <rect x="72" y="70" width="300" height="180" rx="14" fill="#f6f8fa"/>
+    <text x="96" y="108">kanbanflow.com/pricing</text>
+    <text x="96" y="138">reddit · g2 · capterra</text>
+    <text x="96" y="168">github issues · canny</text>
+    <text x="96" y="198">api-docs · changelog</text>
+    <text x="96" y="228" fill="#cf222e">→ 47 pages read</text>
+    <path d="M392 160 h56" stroke="#cf222e" stroke-width="3" stroke-linecap="round"/>
+    <path d="M440 150 l12 10 l-12 10" fill="none" stroke="#cf222e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="488" y="150" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="58" font-weight="800" fill="#1f2328">reverse-app-prompt</text>
+  <text x="490" y="198" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#59636e">Any app in. A build-ready prompt out.</text>
+  <text x="490" y="240" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="17" fill="#cf222e">[Officiel] [Demande] [Correctif] · MVP → V1 → V2</text>
+</svg>
