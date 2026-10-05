@@ -1,3 +1,7 @@
 reverse-app-prompt-workspace/
 *-research/
 .idea/
+evals/
+.claude-plugin/
+.idea/
+
