@@ -1,5 +1,7 @@
 # reverse-app-prompt 🔬 — Any app in, a build-ready prompt out
 
+<p align="center"><b>English</b> · <a href="README.fr.md">Français</a></p>
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
@@ -21,7 +23,7 @@
 
 [Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [What you get](#what-you-get) · [Modes](#modes) · [FAQ](#faq) · [License](LICENSE)
 
-> The skill talks to you and writes the prompt in **French** by default. Ask for another language and it will follow.
+> The skill talks to you and writes the prompt **in your language**: ask in French, get a French prompt.
 
 ## Install
 
@@ -131,7 +133,7 @@ flowchart LR
 - **Web search + page reading first**: fast, nothing to install. The browser is only a fallback, for pages rendered in JavaScript, 403/anti-bot walls, or pricing grids that look identical once flattened to text.
 - **Feedback from at least three kinds of sources**, never review sites alone: feedback boards and Reddit show what users actually ask for, and how often.
 - **Every claim keeps its source URL** in the research notes, so nothing gets lost between research and writing.
-- **Conflicts are surfaced, not hidden**: the most recent official source wins, and every conflict is listed under "Points à valider".
+- **Conflicts are surfaced, not hidden**: the most recent official source wins, and every conflict is listed under "Open questions".
 
 ## What you get
 
@@ -146,7 +148,7 @@ A single Markdown prompt, written to be followed on its own:
 | Functional modules | User stories, business rules, testable acceptance criteria |
 | Key user journeys | Onboarding (or first launch), main flows |
 | Data model | Entities, fields, relations, Mermaid ER diagram |
-| Plans & limits | Quotas, plus the "Points à valider" list |
+| Plans & limits | Quotas, plus the "Open questions" list |
 | Integrations & API | Import/export, public API, webhooks |
 | Non-functional | Security, accessibility, i18n, offline, performance |
 | Pain points to avoid | The original's recurring bugs and the expected behavior |
@@ -156,10 +158,10 @@ Each feature carries its origin, so you know what is faithful and what is improv
 
 | Tag | Meaning |
 |---|---|
-| `[Officiel]` | Documented by the vendor |
-| `[Déduit]` | Inferred (from the API, screenshots…), to confirm |
-| `[Demande]` | Feature request from users, with popularity when known |
-| `[Correctif]` | Known bug of the original, fixed by design |
+| `[Official]` | Documented by the vendor |
+| `[Inferred]` | Deduced (from the API, screenshots…), to confirm |
+| `[Requested]` | Feature request from users, with popularity when known |
+| `[Fix]` | Known bug of the original, fixed by design |
 
 ## Modes
 

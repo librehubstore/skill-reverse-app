@@ -1,116 +1,125 @@
 ---
 name: reverse-app-prompt
-description: Rétro-ingénierie fonctionnelle d'une application existante (SaaS, mobile, desktop, open-source) à partir de tout ce qui est public sur Internet — site officiel, documentation, changelog, tarifs, API, mais aussi bugs, demandes d'amélioration, forums, avis des stores — pour produire un prompt fonctionnel complet, prêt à donner à Claude Code afin de construire une nouvelle application équivalente ou meilleure. Utilise ce skill dès que l'utilisateur veut « cloner », « refaire », « s'inspirer de », « créer une alternative à », « reverse-engineer » une app, rédiger un cahier des charges ou un PRD à partir d'un produit existant, ou lister toutes les fonctionnalités d'une application concurrente pour la reconstruire — même s'il ne prononce pas le mot « prompt ».
+description: Functional reverse-engineering of an existing application (SaaS, mobile, desktop, open-source) from everything public on the web — official site, docs, changelog, pricing, API, plus bug reports, feature requests, forums and store reviews — to produce a complete, ready-to-use functional prompt for Claude Code to build a new, equivalent or better application. Use this skill whenever the user wants to clone, rebuild, recreate, "make my own version of", build an alternative to, or reverse-engineer an app, write a spec / PRD from an existing product, or list every feature of a competitor to rebuild it — even if they never say "prompt". Also triggers in French: « cloner », « refaire », « créer une alternative à », « s'inspirer de », « cahier des charges à partir de <app> ».
 ---
 
 # Reverse App Prompt
 
-But : transformer une application existante en un **prompt fonctionnel exhaustif** que Claude Code pourra exécuter pour bâtir une nouvelle application. La valeur du résultat dépend de deux choses : la **couverture** (n'oublier aucune fonctionnalité réelle) et la **lucidité** (savoir ce qui frustre les utilisateurs actuels, pour faire mieux).
+Goal: turn an existing application into an **exhaustive functional prompt** that Claude Code can execute to build a new application. The result's value rests on two things: **coverage** (no real feature forgotten) and **insight** (knowing what frustrates current users, so the new app does better).
 
-## 1. Poser les questions
+## Language
 
-Demande à l'utilisateur, en un seul message :
+Talk to the user and write every output (notes, final prompt) in **the user's language** — the language of their request — unless they ask for another one. This file is in English for maintainability only. Translate the template's section headings into the output language; keep the origin tags (`[Official]`, `[Inferred]`, `[Requested]`, `[Fix]`) in English so prompts stay comparable across languages.
 
-1. **Quelle est l'application ?** (nom, et éditeur si ambigu)
-2. **Quels sont ses sites officiels ?** (site, docs, blog, GitHub… — « je ne sais pas » est une réponse valable : tu les trouveras)
-3. **Usage public ou interne ?** Public = produit ouvert à des inconnus (comme l'original). Interne = outil réservé à une équipe ou une entreprise. Par défaut : public.
-4. **Stack technique cible ?** L'utilisateur peut imposer la sienne (ex. « NestJS + Angular + PostgreSQL ») ou répondre « propose-moi » : tu lui soumettras alors des options adaptées après l'analyse (étape 4 bis), car la bonne stack dépend de ce que la recherche aura révélé (temps réel, mobile, hors-ligne, API…).
+## 1. Ask the questions
 
-### Mode interne
+Ask the user, in a single message:
 
-Un outil interne n'a pas à convaincre ni à recruter des utilisateurs : tout ce qui sert l'acquisition et la monétisation devient du poids mort qui ralentit la construction. Si l'utilisateur choisit l'usage interne, le prompt final :
+1. **Which application?** (name, and vendor if ambiguous)
+2. **What are its official sites?** (website, docs, blog, GitHub… — "I don't know" is a valid answer: you'll find them)
+3. **Public or internal use?** Public = a product open to anyone (like the original). Internal = a tool for one team or company. Default: public.
+4. **Target tech stack?** The user can impose their own (e.g. "NestJS + Angular + PostgreSQL") or answer "suggest one": you'll then offer tailored options after the analysis (step 4b), because the right stack depends on what the research reveals (real-time, mobile, offline, API…).
 
-- **Authentification** : identifiant + mot de passe uniquement (mots de passe hachés, sessions sécurisées). Comptes créés par un administrateur ; le premier admin est créé au premier lancement (seed ou variable d'environnement). L'admin peut réinitialiser un mot de passe, l'utilisateur peut changer le sien.
-- **Retire** : inscription publique, onboarding (visites guidées, checklists, données de démo, emails de bienvenue), invitations par email, vérification d'email, connexion sociale/SSO, mot de passe oublié par email, plans/tarifs/quotas/paywall/facturation, essais gratuits, pages marketing.
-- **Retire aussi** la 2FA (contraire à « identifiant + mot de passe uniquement »), la suppression de compte en libre-service (remplacée par désactivation/anonymisation par l'admin).
-- **Garde** : rôles et permissions (ils ont toujours un sens en interne), toutes les fonctionnalités métier, y compris celles réservées aux offres payantes de l'original. Les emails métier (rappels, rapports planifiés) passent en notifications in-app, l'email devenant optionnel si un SMTP est configuré.
-- **Par défaut** : une instance = une organisation, auto-hébergeable (Docker). Le parcours « Onboarding » de la section 5 devient « Premier lancement » (création de l'admin, premier board).
-- Les demandes utilisateurs qui portaient sur un élément retiré (ex. « onboarding plus simple ») vont dans « Hors périmètre » avec le reste, pas à la poubelle en silence.
+Mention they can add other constraints (target platform, narrower scope, prompt language).
 
-La collecte ne change pas : continue de lire tarifs et onboarding de l'original, car ils révèlent des fonctionnalités. Le filtrage se fait à la rédaction. Liste les éléments retirés dans la section « Hors périmètre » avec la mention « usage interne », pour que le choix soit visible et réversible.
+Don't re-ask anything the user already answered in their request.
 
-Précise qu'il peut ajouter, s'il le souhaite, d'autres contraintes (plateforme cible, périmètre restreint, langue du prompt). Sans précision : prompt en français.
+### Internal mode
 
-Si l'utilisateur a déjà donné ces informations dans sa demande, ne les redemande pas.
+An internal tool doesn't need to convince or acquire users: everything that serves acquisition and monetization becomes dead weight that slows down the build. If the user picks internal use, the final prompt:
 
-## 2. Outils de collecte
+- **Authentication**: username + password only (hashed passwords, secure sessions). Accounts created by an administrator; the first admin is created at first launch (seed or environment variable). The admin can reset a password; users can change their own.
+- **Removes**: public sign-up, onboarding (guided tours, checklists, demo data, welcome emails), email invitations, email verification, social login/SSO, email-based password recovery, plans/pricing/quotas/paywall/billing, free trials, marketing pages.
+- **Also removes** 2FA (contradicts "username + password only") and self-service account deletion (replaced by admin deactivation/anonymization).
+- **Keeps**: roles and permissions (still meaningful internally) and every business feature, including those reserved for the original's paid plans. Business emails (reminders, scheduled reports) become in-app notifications, with email optional when SMTP is configured.
+- **Defaults**: one instance = one organization, self-hostable (Docker). The "Onboarding" journey in section 5 becomes "First launch" (admin creation, first workspace).
+- User requests about a removed element (e.g. "simpler onboarding") go to "Out of scope" with the rest, not silently dropped.
 
-Les noms d'outils ci-dessous sont ceux de Claude Code ; dans un autre agent, utilise ses équivalents.
+Research doesn't change: keep reading the original's pricing and onboarding, since they reveal features. Filtering happens at writing time. List removed elements under "Out of scope" marked "internal use", so the choice is visible and reversible.
 
-- **Recherche web** (WebSearch) pour découvrir les sources, **lecture de page** (WebFetch) pour les lire. C'est rapide et sans installation ; lance plusieurs lectures en parallèle.
-- **Navigateur piloté** (claude-in-chrome, Playwright MCP ou équivalent) en secours, dans trois cas :
-  - WebFetch renvoie une page vide ou tronquée parce qu'elle est rendue en JavaScript (boards Canny/UserVoice/Featurebase, avis App Store/Google Play, docs en SPA) ;
-  - WebFetch reçoit un **403 / blocage anti-bot** sur une source riche (G2, TrustRadius, Capterra, SaaSHub, Reddit…) : un vrai navigateur passe en général. Ne te contente pas de l'extrait des résultats de recherche quand la page complète est accessible ainsi ;
-  - une page lue en texte brut **semble incohérente** : typiquement une grille tarifaire où toutes les offres paraissent identiques, parce que les coches et croix sont des icônes que le texte extrait ne montre pas. Vérifie-la visuellement dans le navigateur avant d'en tirer la répartition gratuit/payant.
+## 2. Research tools
 
-  Dans Claude Code, charge d'abord le skill `claude-in-chrome`. Si aucun navigateur n'est disponible, note la source comme « non lue » dans les notes et continue. N'utilise pas de session connectée pour accéder à des contenus privés du compte de l'utilisateur sans son accord.
-- Si l'application est open-source : le dépôt GitHub/GitLab est une mine (README, issues, discussions, labels `enhancement`/`bug`, roadmap, CHANGELOG). Les pages `github.com/<org>/<repo>/issues?q=...` se lisent bien avec WebFetch.
+Tool names below are Claude Code's; in another agent, use its equivalents.
 
-## 3. Collecter — deux volets
+- **Web search** (WebSearch) to discover sources, **page reading** (WebFetch) to read them. Fast and nothing to install; run several reads in parallel.
+- **Controllable browser** (claude-in-chrome, Playwright MCP or equivalent) as a fallback, in three cases:
+  - page reading returns an empty or truncated page because it's rendered in JavaScript (Canny/UserVoice/Featurebase boards, App Store/Google Play reviews, SPA docs);
+  - page reading gets a **403 / anti-bot block** on a rich source (G2, TrustRadius, Capterra, SaaSHub, Reddit…): a real browser usually gets through. Don't settle for the search-result snippet when the full page is reachable this way;
+  - a page read as plain text **looks inconsistent**: typically a pricing grid where every plan seems identical, because the check/cross marks are icons the extracted text doesn't show. Check it visually in the browser before deriving the free/paid split.
 
-**Emplacement des fichiers** : si l'utilisateur ou la tâche impose un dossier de sortie, utilise-le. Sinon, le dossier de travail de la session (celui où Claude Code a été lancé). Tout y va : notes et prompt final.
+  In Claude Code, load the `claude-in-chrome` skill first. If no browser is available, mark the source as "not read" in the notes and move on. Don't use a logged-in session to access the user's private account content without their consent.
+- If the application is open-source, its GitHub/GitLab repo is a goldmine (README, issues, discussions, `enhancement`/`bug` labels, roadmap, CHANGELOG). `github.com/<org>/<repo>/issues?q=...` pages read well with page reading.
 
-Tiens un fichier de notes `<slug-app>-research/notes.md` dans ce dossier de sortie, alimenté au fil de l'eau (fonctionnalité → URL complète de la source, jamais un nom de site seul : l'annexe du prompt sera construite à partir de ces notes). La collecte est longue : sans ces notes, le contexte se perd et des fonctionnalités disparaissent au moment de la rédaction.
+## 3. Research — two tracks
 
-### Volet A — Ce que l'application fait (sources officielles)
+**Output location**: if the user or the task imposes an output folder, use it. Otherwise, the session's working directory. Everything goes there: notes and final prompt.
 
-Par ordre de rendement :
+Keep a notes file `<app-slug>-research/notes.md` in that folder, updated as you go (feature → full source URL, never just a site name: the prompt's appendix is built from these notes). Research is long: without these notes, context gets lost and features vanish at writing time. One line per finding, review sites and API sub-pages included:
 
-1. **Centre d'aide / documentation** : chaque article décrit souvent une fonctionnalité précise, avec ses règles et ses limites. Parcours le sommaire en entier avant de plonger.
-2. **Page tarifs** : la matrice des plans révèle la liste quasi complète des fonctionnalités et les limites (quotas, nombre d'utilisateurs, stockage).
-3. **Changelog / release notes / blog produit** : fonctionnalités récentes ou discrètes absentes du marketing.
-4. **Documentation API / webhooks** : révèle le **modèle de données** réel (entités, champs, statuts, relations). Très précieux pour la section modèle de données.
-5. **Pages fonctionnalités, intégrations, raccourcis clavier, sécurité/conformité, CGU** (limites, rôles, rétention).
-6. **Vidéos et tutoriels** (titres et descriptions) pour les parcours utilisateur.
+```
+- Recurring tasks reappear as soon as completed [Fix] — https://www.capterra.com/p/161732/KanbanFlow/reviews (2024 review)
+- Webhook payloads are HMAC-signed [Official] — https://kanbanflow.com/api-docs/webhook-security
+```
 
-**Pas de centre d'aide public ?** (404, derrière login, inexistant) Ne t'arrête pas là, c'est fréquent. Remplace-le, par ordre de rendement : documentation API (souvent la source la plus précise sur les règles et les champs), FAQ intégrée aux pages tarifs/fonctionnalités, fiches des stores (App Store, Google Play, Chrome Web Store : descriptions et notes de version), tutoriels tiers et vidéos YouTube, archives du centre d'aide sur web.archive.org. Signale dans les notes que l'aide officielle manquait, pour que les éléments déduits soient pondérés en conséquence.
+### Track A — What the application does (official sources)
 
-### Volet B — Ce que les utilisateurs veulent et subissent
+By yield:
 
-Cherche avec des requêtes comme `"<app>" feature request`, `"<app>" bug`, `"<app>" roadmap`, `"<app>" vs`, `"<app>" alternative`, `site:reddit.com <app>`, `"<app>" canny`, `"<app>" uservoice`, `"<app>" avis` :
+1. **Help center / documentation**: each article often describes one precise feature, with its rules and limits. Go through the whole table of contents before diving in.
+2. **Pricing page**: the plan matrix reveals a near-complete feature list and the limits (quotas, seats, storage).
+3. **Changelog / release notes / product blog**: recent or low-key features missing from marketing.
+4. **API / webhook docs**: reveal the real **data model** (entities, fields, statuses, relations). Very valuable for the data model section.
+5. **Feature, integration, keyboard shortcut, security/compliance and terms pages** (limits, roles, retention).
+6. **Videos and tutorials** (titles and descriptions) for user journeys.
 
-- **Boards de feedback / roadmap publique** (Canny, UserVoice, Featurebase, Productboard, Upvoty, forum communautaire) : trie par votes, les demandes les plus votées sont les meilleures opportunités.
-- **Issues GitHub** (bugs et `enhancement`), discussions.
-- **Reddit, Hacker News, Product Hunt** : irritants concrets, comparaisons.
-- **Avis** : App Store, Google Play, G2, Capterra, Trustpilot — concentre-toi sur les avis 1-3 étoiles, ils listent les manques.
-- **AlternativeTo / comparatifs « X vs Y »** : fonctionnalités que les concurrents ont et que l'application n'a pas.
+**No public help center?** (404, behind login, nonexistent) Don't stop there, it's common. Replace it, by yield: API docs (often the most precise source on rules and fields), FAQ embedded in pricing/feature pages, store listings (App Store, Google Play, Chrome Web Store: descriptions and release notes), third-party tutorials and YouTube videos, archived help center on web.archive.org. Note in the notes that official help was missing, so inferred elements are weighted accordingly.
 
-**Couvre au moins trois familles de sources** parmi : board de feedback/forum officiel, GitHub, Reddit/HN, avis des stores, sites d'avis (G2, Capterra…), comparatifs. Les sites d'avis seuls donnent une vision biaisée (avis courts, souvent anciens) ; Reddit et les boards de feedback révèlent les vraies demandes, avec leur popularité. Pour Reddit, cherche aussi les subreddits du domaine (r/productivity, r/projectmanagement…) et pas seulement le nom de l'app. Si une famille ne donne rien après une recherche sérieuse, note-le plutôt que de l'ignorer en silence.
+### Track B — What users want and endure
 
-Pour chaque bug récurrent, retiens le **comportement attendu** (c'est ce qui ira dans le prompt), pas seulement le symptôme.
+Search with queries such as `"<app>" feature request`, `"<app>" bug`, `"<app>" roadmap`, `"<app>" vs`, `"<app>" alternative`, `site:reddit.com <app>`, `"<app>" canny`, `"<app>" uservoice`, plus the same in the app's main market language when it isn't English:
 
-### Quand s'arrêter
+- **Feedback boards / public roadmaps** (Canny, UserVoice, Featurebase, Productboard, Upvoty, community forum): sort by votes, the most-voted requests are the best opportunities.
+- **GitHub issues** (bugs and `enhancement`), discussions.
+- **Reddit, Hacker News, Product Hunt**: concrete pain points, comparisons.
+- **Reviews**: App Store, Google Play, G2, Capterra, Trustpilot — focus on 1-3 star reviews, they list what's missing.
+- **AlternativeTo / "X vs Y" comparisons**: features competitors have that the app lacks.
 
-Vise large (souvent 30 à 80 pages selon la taille de l'app). Arrête-toi quand les nouvelles pages n'apportent plus de fonctionnalité nouvelle. Pour une grosse application, tu peux lancer deux sous-agents en parallèle (volet A et volet B) qui écrivent chacun dans leur fichier de notes, si ton environnement propose des sous-agents.
+**Cover at least three source families** among: feedback board/official forum, GitHub, Reddit/HN, store reviews, review sites (G2, Capterra…), comparisons. Review sites alone give a biased view (short, often old reviews); Reddit and feedback boards reveal real requests and their popularity. For Reddit, also search the domain's subreddits (r/productivity, r/projectmanagement…), not just the app's name. If a family yields nothing after a serious search, note it rather than skipping it silently.
 
-## 4. Synthétiser
+For each recurring bug, record the **expected behavior** (that's what goes into the prompt), not just the symptom.
 
-À partir des notes, construis l'inventaire en marquant l'origine de chaque élément — c'est ce qui permet au lecteur de distinguer le fidèle de l'amélioré :
+### When to stop
 
-- `[Officiel]` documenté par l'éditeur
-- `[Déduit]` inféré (ex. depuis l'API ou une capture), à confirmer
-- `[Demande]` demande d'amélioration utilisateurs (indique la popularité si connue)
-- `[Correctif]` comportement corrigé par rapport à un bug connu de l'original
+Go wide (often 30 to 80 pages depending on the app's size). Stop when new pages stop bringing new features. For a large application, you can run two sub-agents in parallel (track A and track B), each writing its own notes file, if your environment supports sub-agents.
 
-**Sources peu fiables** : écarte les pages qui semblent générées automatiquement (fiches d'annuaires ou « reviews » génériques, sans détail concret, souvent copiées d'un site à l'autre) dès qu'elles contredisent une source officielle ou affirment une fonctionnalité que rien d'autre ne confirme. Une fonctionnalité n'apparaissant que dans une telle source ne doit pas entrer dans le prompt, ou seulement en `[Déduit]` avec la mention de sa source. Note les sources écartées dans les notes.
+## 4. Synthesize
 
-**Sources contradictoires** (ex. une fonctionnalité gratuite selon un vieil avis, payante selon la page tarifs) : la source officielle la plus récente l'emporte, car les avis datent souvent d'une offre révolue. Ne tranche pas en silence : liste chaque conflit dans une sous-section « Points à valider » de la section 7 (ou de la section concernée), avec les deux sources et la décision retenue.
+From the notes, build the inventory, tagging each element's origin — this is what lets the reader tell faithful from improved:
 
-Regroupe ensuite en modules fonctionnels cohérents, déduis les rôles, les entités et leurs relations, et priorise : **MVP** (cœur indispensable pour que l'app soit utilisable), **V1**, **V2+**. Les demandes utilisateurs très votées peuvent remonter en V1 si elles sont un vrai différenciateur.
+- `[Official]` documented by the vendor
+- `[Inferred]` deduced (e.g. from the API or a screenshot), to confirm
+- `[Requested]` user feature request (give popularity when known)
+- `[Fix]` behavior corrected relative to a known bug of the original
 
-## 4 bis. Choisir la stack
+**Unreliable sources**: discard pages that look auto-generated (generic directory listings or "reviews" with no concrete detail, often copied from site to site) whenever they contradict an official source or claim a feature nothing else confirms. A feature appearing only in such a source stays out of the prompt, or goes in as `[Inferred]` with its source named. Log discarded sources in the notes.
 
-Si l'utilisateur a imposé une stack, garde-la telle quelle : ne la « corrige » pas, signale seulement en une ligne un vrai point de friction (ex. besoin hors-ligne avec une stack 100 % serveur).
+**Conflicting sources** (e.g. a feature free per an old review, paid per the pricing page): the most recent official source wins, since reviews often describe an outdated offer. Don't decide silently: list each conflict in an "Open questions" subsection of section 7 (or the relevant section), with both sources and the decision taken.
 
-Sinon, lis `references/stacks.md`, déduis le profil de l'application à partir de la synthèse (web collaboratif, temps réel, mobile, hors-ligne, desktop, outil interne CRUD…) et propose **2 ou 3 options** adaptées, la recommandée en premier, chacune avec une phrase sur ce qui la justifie pour cette application précise. Utilise l'outil de question à choix (AskUserQuestion dans Claude Code) s'il existe ; l'utilisateur doit toujours pouvoir saisir sa propre stack. Si personne ne peut répondre (exécution autonome), retiens l'option recommandée et indique-le dans le prompt.
+Then group into coherent functional modules, deduce roles, entities and their relations, and prioritize: **MVP** (the core needed for the app to be usable), **V1**, **V2+**. Highly voted user requests can move up to V1 if they're a real differentiator.
 
-## 5. Rédiger le prompt
+## 4b. Choose the stack
 
-Lis `references/prompt-template.md` et suis sa structure. Points qui comptent :
+If the user imposed a stack, keep it as is: don't "correct" it, just flag a real friction point in one line (e.g. an offline need with a 100% server-side stack).
 
-- **Fonctionnel, pas technique** : décrire le *quoi* et les règles de gestion, avec des critères d'acceptation vérifiables. La stack retenue va en section 13 ; le reste du prompt ne dépend pas d'elle.
-- **Autoportant** : Claude Code n'aura que ce prompt. Pas de « comme dans <app> » sans expliquer le comportement.
-- **Pas de reprise de l'identité de l'original** : nouveau nom (proposer un nom de code), pas de logo, de textes marketing copiés ni de charte graphique reproduite. On reconstruit des fonctionnalités, pas une marque. Les références à l'application originale restent dans la section contexte et les sources.
-- **Exhaustif mais lisible** : listes et tableaux plutôt que prose. Un prompt long est normal ici ; un prompt flou ne l'est pas.
+Otherwise, read `references/stacks.md`, infer the app's profile from the synthesis (collaborative web, real-time, mobile, offline, desktop, internal CRUD tool…) and offer **2 or 3 tailored options**, recommended one first, each with one sentence on why it fits this particular app. Use the multiple-choice question tool (AskUserQuestion in Claude Code) if available; the user must always be able to type their own stack. If nobody can answer (autonomous run), take the recommended option and say so in the prompt.
 
-Enregistre le résultat dans `<slug-app>-prompt.md` (dossier de sortie défini plus haut), sources en annexe avec des **URLs complètes** (pas de chemins abrégés : le lecteur doit pouvoir cliquer). Dans le chat, donne un résumé court : nombre de modules / fonctionnalités, top 5 des améliorations issues du volet B, chemin du fichier, et les zones d'incertitude (`[Déduit]`) à valider.
+## 5. Write the prompt
+
+Read `references/prompt-template.md` and follow its structure. What matters:
+
+- **Functional, not technical**: describe the *what* and the business rules, with verifiable acceptance criteria. The chosen stack goes in section 13; the rest of the prompt doesn't depend on it.
+- **Self-contained**: Claude Code will only have this prompt. No "like in <app>" without explaining the behavior.
+- **No reuse of the original's identity**: new name (suggest a code name), no logo, no copied marketing copy, no reproduced visual identity. We rebuild features, not a brand. References to the original stay in the context section and sources.
+- **Exhaustive yet readable**: lists and tables over prose. A long prompt is normal here; a vague one isn't.
+
+Save the result to `<app-slug>-prompt.md` (output folder defined above), with sources in the appendix as **full URLs** (no shortened paths: the reader must be able to click). In the chat, give a short summary: number of modules / features, top 5 improvements from track B, file path, and the uncertain areas (`[Inferred]`) to validate.

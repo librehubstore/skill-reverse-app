@@ -12,5 +12,5 @@
   </g>
   <text x="488" y="150" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="58" font-weight="800" fill="#1f2328">reverse-app-prompt</text>
   <text x="490" y="198" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#59636e">Any app in. A build-ready prompt out.</text>
-  <text x="490" y="240" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="17" fill="#cf222e">[Officiel] [Demande] [Correctif] · MVP → V1 → V2</text>
+  <text x="490" y="240" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="17" fill="#cf222e">[Official] [Requested] [Fix] · MVP → V1 → V2</text>
 </svg>
